@@ -86,13 +86,8 @@
 
             if (message.trim() === "") return;
 
-            // 1. Send the message to the receiver via the hub
+            // Send the message to the hub. The hub will now send it to both the receiver and the sender.
             connection.invoke("SendMessage", receiverId, message).catch(function (err) {
-                return console.error(err.toString());
-            });
-
-            // 2. Also call "ReceiveMessage" for the SENDER's own screen immediately
-            connection.invoke("ReceiveMessage", currentUserId, message).catch(function (err) {
                 return console.error(err.toString());
             });
 

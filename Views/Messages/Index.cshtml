@@ -1,0 +1,16 @@
+@model IEnumerable<SignalRMessenger.Models.ApplicationUser>
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+<h1>Select a User to Chat With</h1>
+
+<div class="list-group">
+    @foreach (var user in Model)
+    {
+        <a asp-action="Chat" asp-route-receiverId="@user.Id" class="list-group-item list-group-item-action">
+            @user.UserName
+        </a>
+    }
+</div>

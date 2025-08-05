@@ -4,7 +4,7 @@ namespace SignalRMessenger.ViewModels
 {
     public class ChatViewModel
     {
-        public ApplicationUser Receiver { get; set; }
-        public List<Message> Messages { get; set; }
+        public ApplicationUser Receiver { get; set; } = null!;
+        public List<Message> Messages { get; set; } = null!;
     }
 }

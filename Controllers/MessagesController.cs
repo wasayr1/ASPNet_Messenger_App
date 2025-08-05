@@ -61,33 +61,6 @@ namespace SignalRMessenger.Controllers
             return View(viewModel);
         }
 
-        // POST: /Messages/Create
-        // This action handles sending a new message.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(string receiverId, string content)
-        {
-            if (string.IsNullOrEmpty(content))
-            {
-                // If content is empty, just redirect back to the chat.
-                return RedirectToAction("Chat", new { receiverId });
-            }
-
-            var senderId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            var message = new Message
-            {
-                SenderId = senderId,
-                ReceiverId = receiverId,
-                Content = content,
-                Timestamp = DateTime.UtcNow
-            };
-
-            _context.Add(message);
-            await _context.SaveChangesAsync();
-
-            // Redirect back to the chat window with the same user
-            return RedirectToAction("Chat", new { receiverId });
-        }
+        
     }
 }

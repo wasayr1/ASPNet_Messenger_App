@@ -31,3 +31,73 @@
         <button type="submit" class="btn btn-primary">Send</button>
     </div>
 </form>
+
+@section Scripts {
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script>
+        "use strict";
+
+        // Get the user IDs from the model
+        const currentUserId = "@User.FindFirstValue(ClaimTypes.NameIdentifier)";
+        const receiverId = "@Model.Receiver.Id";
+
+        // Create a connection to our ChatHub
+        const connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+
+        // Start the connection
+        connection.start().then(function () {
+            console.log("SignalR Connected.");
+            // Disable the send button until the connection is established
+            document.getElementById("sendButton").disabled = false;
+        }).catch(function (err) {
+            return console.error(err.toString());
+        });
+
+        // This func is called by the HUB when a new message is received
+        connection.on("ReceiveMessage", function (senderId, message) {
+            const chatBox = document.getElementById("chat-box");
+
+            // Determine message alignment and color based on the sender
+            const messagePosition = senderId === currentUserId ? "d-flex justify-content-end" : "d-flex justify-content-start";
+            const messageColor = senderId === currentUserId ? "bg-primary text-white" : "bg-light";
+            const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            // Create the HTML for the new message
+            const messageDiv = document.createElement("div");
+            messageDiv.className = messagePosition + " mb-2";
+            messageDiv.innerHTML = `
+                <div class="p-2 rounded ${messageColor}" style="max-width: 70%;">
+                    <p class="mb-0">${message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>
+                    <small class="text-muted d-block text-end">${timestamp}</small>
+                </div>`;
+
+            // Add the new message to the chat box and scroll to the bottom
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+
+        // Handle the message form submission
+        document.getElementById("messageForm").addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent the default form post (page reload)
+
+            const messageInput = document.getElementById("messageInput");
+            const message = messageInput.value;
+
+            if (message.trim() === "") return;
+
+            // 1. Send the message to the receiver via the hub
+            connection.invoke("SendMessage", receiverId, message).catch(function (err) {
+                return console.error(err.toString());
+            });
+
+            // 2. Also call "ReceiveMessage" for the SENDER's own screen immediately
+            connection.invoke("ReceiveMessage", currentUserId, message).catch(function (err) {
+                return console.error(err.toString());
+            });
+
+            // Clear the input box
+            messageInput.value = "";
+            messageInput.focus();
+        });
+    </script>
+}

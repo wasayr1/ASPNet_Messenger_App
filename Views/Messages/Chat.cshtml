@@ -24,6 +24,10 @@
     }
 </div>
 
+<div id="suggestion-box" class="d-flex justify-content-center flex-wrap py-2">
+    <!-- AI suggestions will be added here -->
+</div>
+
 <form id="messageForm">
     <input type="hidden" name="receiverId" value="@Model.Receiver.Id" />
     <div class="input-group">
@@ -95,5 +99,23 @@
             messageInput.value = "";
             messageInput.focus();
         });
+    
+        connection.on("ReceiveSuggestions", function (suggestions) {
+        const suggestionBox = document.getElementById("suggestion-box");
+        suggestionBox.innerHTML = ""; // Clear old suggestions
+
+        suggestions.forEach(suggestion => {
+            const button = document.createElement("button");
+            button.className = "btn btn-outline-secondary btn-sm m-1";
+            button.textContent = suggestion;
+            button.onclick = function() {
+                // When a suggestion is clicked, put its text in the message box
+                const messageInput = document.getElementById("messageInput");
+                messageInput.value = suggestion;
+                messageInput.focus();
+            };
+            suggestionBox.appendChild(button);
+        });
+    });
     </script>
 }
